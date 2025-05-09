@@ -1,4 +1,6 @@
 import sys
+from project import *
+from create_project_gui import *
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,
     QLineEdit, QListWidget, QListWidgetItem, QPushButton, QLabel
@@ -82,10 +84,30 @@ class MainWindow(QWidget):
 
     # 以下为功能按钮的占位方法（后续可扩展）
     def open_project(self):
-        print("打开项目")
 
+        projects = Project.open_all_projects()
+        if not projects:
+            print("没有找到任何项目")
+            return
+
+            # 打印项目信息
+        print("=" * 40)
+        print(f"{'项目列表':^40}")
+        print("=" * 40)
+        for idx, proj in enumerate(projects, 1):
+            print(f"{idx}. {proj.name}")
+            print(f"  描述: {proj.description}")
+            print(f"  源语言: {proj.source_language}")
+            print(f"  目标语言: {', '.join(proj.target_languages)}")
+            print("-" * 40)
     def create_project(self):
-        print("创建新项目")
+        project1=Createproject()
+        result=project1.exec()
+        if result == QDialog.DialogCode.Accepted:
+            print("项目创建成功！")  # 可根据实际获取项目数据
+        else:
+            print("用户取消操作")
+
 
     def manage_memory(self):
         print("记忆库管理")

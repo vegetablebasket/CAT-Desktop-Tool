@@ -1,12 +1,13 @@
 # main_window.py
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction
+from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction,QFileDialog
 from dao import document_dao
 from pages.project_page import ProjectPage
 from pages.document_page import DocumentPage
 from pages.translation_page import TranslationPage
 from pages.term_page import TermPage
 from pages.tm_page import TMPage
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -44,11 +45,33 @@ class MainWindow(QMainWindow):
             action.triggered.connect(lambda _, idx=index: self.stack.setCurrentIndex(idx))
             nav_menu.addAction(action)
 
+        # 添加导入文档功能
+        import_action = QAction('导入文档', self)
+        import_action.triggered.connect(self.import_document)
+        nav_menu.addAction(import_action)
+
     def init_database(self):
         """初始化数据库：创建表格"""
         # 确保数据库表已经创建
         document_dao.init_doc_table()  # 初始化文档表
         document_dao.init_translation_fragments_table()  # 初始化翻译片段表
+
+    def import_document(self):
+        """导入文档"""
+        file_path, _ = QFileDialog.getOpenFileName(self, "选择文档", "", "Text Files (*.txt);;All Files (*)")
+        if file_path:
+            # 假设文档名称为文件名，项目 ID 为 1
+            document_name = os.path.basename(file_path)
+            project_id = 1  # 例如，文档属于项目 ID 1
+            document_dao.add_document(document_name, file_path, project_id)
+
+        # 用来存储当前文档 ID
+        self.current_document = None
+
+    def load_translation_page(self, document_id):
+        """加载翻译编辑页面"""
+        self.pages["翻译编辑"].current_document_id = document_id  # 更新文档 ID
+        self.pages["翻译编辑"].load_paragraphs()  # 重新加载段落
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

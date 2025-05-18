@@ -62,7 +62,7 @@ class DocumentPage(QWidget):
 
     def import_file(self):
         """导入文件，支持 .txt、.docx、.pdf 格式"""
-        path, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "Text Files (*.txt);;Word Files (*.docx);;PDF Files (*.pdf)")
+        path, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "Text Files (*.txt);;Word Files (*.docx);;PDF Files (*.pdf);;All Files (*)")
         if path:
             file_extension = os.path.splitext(path)[1].lower()
             try:
@@ -90,9 +90,14 @@ class DocumentPage(QWidget):
 
     def read_txt(self, file_path):
         """读取 .txt 文件，将每一行当作一个段落"""
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read().splitlines()  # 按行分割为段落
-        return content
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read().splitlines()  # 按行分割为段落
+        except UnicodeDecodeError:
+            # 如果 utf-8 解码失败，尝试使用 gbk 编码
+            with open(file_path, "r", encoding="gbk") as f:
+                content = f.read().splitlines()
+        return '\n'.join(content)
 
     def read_docx(self, file_path):
         """读取 .docx 文件，返回所有段落"""

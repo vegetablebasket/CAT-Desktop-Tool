@@ -41,16 +41,18 @@ def init_translation_fragments_table():
     conn.commit()
     conn.close()
 
+
+# 添加文档
 def add_document(name, content, project_id):
+    """将文件内容作为字符串插入数据库"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO documents (name, content, created_at, project_id)
-        VALUES (?, ?, ?, ?)
-    ''', (name, content, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), project_id))
+    cursor.execute('''INSERT INTO documents (name, content, created_at, project_id)
+                      VALUES (?, ?, ?, ?)''',
+                   (name, content, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), project_id))
     conn.commit()
     conn.close()
-
+# 获取文档
 def get_documents_by_project(project_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -59,13 +61,24 @@ def get_documents_by_project(project_id):
     conn.close()
     return result
 
+def reset_autoincrement():
+    """重置 AUTOINCREMENT 值"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name='documents'")  # 重置 documents 表的自增 ID
+    conn.commit()
+    conn.close()
+
+# 删除文档
 def delete_document(doc_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
     conn.commit()
     conn.close()
+    reset_autoincrement() # 删除后重置AUTOINCREMENT
 
+# 添加翻译片段
 def add_translation_fragment(document_id, fragment):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -76,6 +89,7 @@ def add_translation_fragment(document_id, fragment):
     conn.commit()
     conn.close()
 
+# 获取文档的翻译片段
 def get_translation_fragments_by_document(document_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -84,6 +98,7 @@ def get_translation_fragments_by_document(document_id):
     conn.close()
     return result
 
+# 保存翻译内容
 def save_translation(fragment_id, translated_text):
     """保存翻译结果"""
     conn = sqlite3.connect(DB_PATH)

@@ -1,14 +1,23 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QTextEdit, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QTextEdit, QPushButton, QMessageBox, QListWidgetItem, QLineEdit
+from PyQt5.QtGui import QColor
 from dao import document_dao
 
-
 class TranslationPage(QWidget):
-    def __init__(self, document_id=None):
+    def __init__(self):
         super().__init__()
-        self.current_document_id = document_id if document_id else 1  # 默认文档 ID 为 1
 
         layout = QVBoxLayout()
         self.setLayout(layout)
+
+        # 文档ID输入框
+        self.document_id_input = QLineEdit(self)
+        self.document_id_input.setPlaceholderText("请输入文档ID")
+        layout.addWidget(self.document_id_input)
+
+        # 加载文档按钮
+        self.load_button = QPushButton("加载文档")
+        self.load_button.clicked.connect(self.load_paragraphs)
+        layout.addWidget(self.load_button)
 
         # 段落列表显示
         self.paragraph_list = QListWidget()
@@ -25,14 +34,36 @@ class TranslationPage(QWidget):
         self.save_button.clicked.connect(self.save_translation)
         layout.addWidget(self.save_button)
 
-        self.load_paragraphs()
-
     def load_paragraphs(self):
-        """加载并显示所有段落"""
-        self.paragraph_list.clear()  # 清空列表
+        """根据文档ID加载并显示所有段落"""
+        document_id = self.document_id_input.text()
+        if not document_id.isdigit():
+            QMessageBox.warning(self, "错误", "请输入有效的文档ID")
+            return
+
+        self.current_document_id = int(document_id)  # 设置当前文档ID
+        self.paragraph_list.clear()  # 清空段落列表
+
+        # 获取对应文档的段落
         fragments = document_dao.get_translation_fragments_by_document(self.current_document_id)
+        if not fragments:
+            QMessageBox.warning(self, "错误", "未找到该文档或该文档没有段落")
+            return
+
+        # 显示段落
         for fragment in fragments:
-            self.paragraph_list.addItem(fragment[1])  # 显示段落内容
+            if len(fragment) >= 2:
+                item = QListWidgetItem(fragment[1])  # 显示段落内容
+
+                # 检查翻译字段是否存在并且非空
+                if len(fragment) > 2 and fragment[2] and fragment[2].strip():
+                    item.setBackground(QColor(0, 255, 0))  # 设置为绿色，表示翻译已完成
+                else:
+                    item.setBackground(QColor(255, 0, 0))  # 红色表示未翻译
+
+                self.paragraph_list.addItem(item)
+            else:
+                print(f"Fragment issue: {fragment}")
 
     def on_paragraph_click(self, item):
         """段落点击时显示段落内容在翻译框"""
@@ -63,3 +94,5 @@ class TranslationPage(QWidget):
                 QMessageBox.warning(self, "错误", "无法找到对应的段落！")
         else:
             QMessageBox.warning(self, "错误", "请先选择一个段落进行翻译。")
+
+

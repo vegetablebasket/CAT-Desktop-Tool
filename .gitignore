@@ -3,3 +3,6 @@
 
 # 忽略PyCharm编辑器相关
 .idea/
+# 忽略 Python 字节码缓存目录和文件
+__pycache__/
+*.pyc

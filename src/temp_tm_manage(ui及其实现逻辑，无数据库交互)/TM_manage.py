@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets ,uic
-from numpy.ma.core import get_data
+
 
 import temp_TM_item_show
 
@@ -110,7 +110,7 @@ class Widget_TM(QtWidgets.QWidget):
             self.TM_item_show = temp_TM_item_show.TM_items_show(name=item_text)
             self.TM_item_show.exec()
         except Exception as e:
-            print("双击出错" + e)
+            print("双击出错" , e)
     #单击跳出预览界面
     def on_item_clicked(self, index: QtCore.QModelIndex):
         try:

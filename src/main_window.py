@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("CAT 翻译工具")
         self.setGeometry(100, 100, 1000, 600)
+        self.resize(1200, 900)  # 建议宽1200像素，高900像素
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -44,9 +45,17 @@ class MainWindow(QMainWindow):
         切换到文档管理页面，并传递project_id
         """
         # 每次都新建一个文档页面（保证刷新内容），并切换到它
-        doc_page = DocumentPage(project_id)
+        doc_page = DocumentPage(project_id, main_window=self)
         self.stack.addWidget(doc_page)
         self.stack.setCurrentWidget(doc_page)
+
+    def show_translation_page(self, document_id):
+        """
+        切换到翻译编辑页面，并传递文档ID
+        """
+        page = TranslationPage(document_id)
+        self.stack.addWidget(page)
+        self.stack.setCurrentWidget(page)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -39,3 +39,9 @@ conn.commit()
 conn.close()
 
 print("数据库表结构创建完成！你只需要运行本脚本一次。")
+
+# 引入并调用 create_table
+from translation_fragment_dao import create_table as create_fragments_table
+create_fragments_table()   # 这句确保建好 translation_fragments 表
+
+print("数据库所有表结构创建完成！")

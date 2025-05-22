@@ -1,6 +1,8 @@
 import sys
 import sqlite3
 import os
+import csv
+from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtCore, QtGui, QtWidgets ,uic
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem
 
@@ -113,6 +115,8 @@ class TM_items_show(QtWidgets.QDialog):
         self.pushButton_save.clicked.connect(self.saveTMitems)
         self.pushButton_edit.clicked.connect(self.editTMitems)
         self.pushButton_delete.clicked.connect(self.deleteTMitems)
+        self.pushButton_export.clicked.connect(self.export_tm_items)
+        self.pushButton_import.clicked.connect(self.import_tm_items)
 
         #初始化prev_selected_item
         self.prev_selected_items = set()
@@ -244,6 +248,81 @@ class TM_items_show(QtWidgets.QDialog):
             QtWidgets.QMessageBox.warning(self, "提示", "已删除行" + str(row + 1))
         except Exception as ex:
             print("delete wrong" , ex)
+
+    def export_tm_items(self):
+        try:
+            # 选择保存文件路径
+            file_path, _ = QFileDialog.getSaveFileName(self, "导出翻译记忆库", "", "CSV文件 (*.csv)")
+            if not file_path:
+                return
+
+            # 连接数据库，查询所有数据
+            conn = sqlite3.connect(TM_dao.DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT tm_id, source_text, target_text, source_lang, target_lang, created_by, created_at FROM translation_memory")
+            rows = cursor.fetchall()
+            conn.close()
+
+            # 写入CSV
+            with open(file_path, mode='w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.writer(f)
+                # 写表头
+                writer.writerow(['ID', '源文本', '目标文本', '源语言', '目标语言', '创建者', '创建时间'])
+                # 写数据
+                for row in rows:
+                    writer.writerow(row)
+
+            QtWidgets.QMessageBox.information(self, "导出成功", f"已成功导出到 {file_path}")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "导出失败", f"导出过程中出错: {e}")
+
+    def import_tm_items(self):
+        try:
+            # 选择CSV文件
+            file_path, _ = QFileDialog.getOpenFileName(self, "导入翻译记忆库", "", "CSV文件 (*.csv)")
+            if not file_path:
+                return
+
+            # 读取CSV文件
+            with open(file_path, mode='r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                rows_to_insert = []
+                for row in reader:
+                    # 简单校验必填字段
+                    if not row['源文本'] or not row['目标文本'] or not row['源语言'] or not row['目标语言']:
+                        continue
+                    # 创建者字段如果为空，默认1
+                    created_by = int(row['创建者']) if row['创建者'].isdigit() else 1
+                    rows_to_insert.append((
+                        row['源文本'],
+                        row['目标文本'],
+                        row['源语言'],
+                        row['目标语言'],
+                        created_by
+                    ))
+
+            if not rows_to_insert:
+                QtWidgets.QMessageBox.warning(self, "导入失败", "没有有效数据可导入")
+                return
+
+            # 插入数据库
+            conn = sqlite3.connect(TM_dao.DB_FILE)
+            cursor = conn.cursor()
+            cursor.executemany('''
+                INSERT INTO translation_memory (source_text, target_text, source_lang, target_lang, created_by)
+                VALUES (?, ?, ?, ?, ?)
+            ''', rows_to_insert)
+            conn.commit()
+            conn.close()
+
+            # 重新加载数据刷新界面
+            self.load_tm_data()
+            QtWidgets.QMessageBox.information(self, "导入成功", f"成功导入 {len(rows_to_insert)} 条记录")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "导入失败", f"导入过程中出错: {e}")
 
     #在条目取消选中时自动保存并进行提示
     def on_selection_changed(self):

@@ -4,6 +4,7 @@
 import sqlite3
 import os
 
+
 # 数据库文件名，可以根据自己需要修改
 DB_PATH = os.path.join(os.path.dirname(__file__), "../data/database.db")
 

@@ -1,8 +1,16 @@
 import sys
 import sqlite3
+import os
 from PyQt5 import QtCore, QtGui, QtWidgets ,uic
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem
-import TM_dao
+
+# 获取 src 目录的绝对路径
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+# 现在可以导入 dao 下的模块
+from dao import TM_dao
 
 class EditableTextEdit(QtWidgets.QTextEdit):
 

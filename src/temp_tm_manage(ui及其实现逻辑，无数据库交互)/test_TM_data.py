@@ -1,6 +1,13 @@
 import sqlite3
 import os
-import TM_dao
+import sys
+# 获取 src 目录的绝对路径
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+# 现在可以导入 dao 下的模块
+from dao import TM_dao
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "../data/database.db")
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

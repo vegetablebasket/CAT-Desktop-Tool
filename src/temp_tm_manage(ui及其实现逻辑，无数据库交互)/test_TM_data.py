@@ -2,7 +2,7 @@ import sqlite3
 import os
 import TM_dao
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "../data/database_test.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "../data/database.db")
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 conn = sqlite3.connect(DB_PATH)
 

@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_FILE = os.path.join(os.path.dirname(__file__), "../temp/database.db")
+DB_FILE = os.path.join(os.path.dirname(__file__), "../data/database.db")
 
 #插入新条目
 def insert_tm_entry(source_text, target_text, source_lang=None, target_lang=None,  created_by=None):

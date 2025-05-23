@@ -1,4 +1,6 @@
+import random
 import sys
+import hashlib
 from langdetect import detect
 import requests
 from PyQt6.QtWidgets import (
@@ -6,6 +8,7 @@ from PyQt6.QtWidgets import (
     QLineEdit, QListWidget, QPushButton, QLabel, QTextEdit, QSplitter, QStatusBar
 )
 from PyQt6.QtCore import Qt
+from pandas._libs import json
 
 
 class TranslateWindow(QWidget):
@@ -114,37 +117,42 @@ class TranslateWindow(QWidget):
         self.project_output_text.clear()
         self.status_bar.clearMessage()
 
-    def translate_text_with_microsoft(input_text, target_language="en"):
-        """
-        使用 Microsoft Translator API 翻译文本
-        """
-        # 替换为你的订阅密钥和终结点
-        subscription_key = "YOUR_MICROSOFT_TRANSLATOR_KEY"
-        endpoint = "https://api.cognitive.microsofttranslator.com/translate"
+    def translate_text_with_microsoft(self, input_text, target_language="zh"):
+        # 设置百度翻译API参数（替换为你的appid和appkey）
+        appid = '20250520002361934'
+        appkey = 'TUDvE1a3cX7vIzrpSlzj'
 
-        # 请求头
-        headers = {
-            "Ocp-Apim-Subscription-Key": subscription_key,
-            "Ocp-Apim-Subscription-Region": "YOUR_REGION",  # 替换为你的区域
-            "Content-Type": "application/json"
+        # 动态设置源语言和目标语言
+        from_lang = 'auto'  # 自动检测源语言
+        to_lang = target_language
+
+        endpoint = 'http://api.fanyi.baidu.com'
+        path = '/api/trans/vip/translate'
+        url = endpoint + path
+
+        # 生成盐和签名
+        def make_md5(s, encoding='utf-8'):
+            return hashlib.md5(s.encode(encoding)).hexdigest()
+
+        salt = random.randint(32768, 65536)
+        sign = make_md5(appid + input_text + str(salt) + appkey)
+
+        # 构建请求参数
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        payload = {
+            'appid': appid,
+            'q': input_text,
+            'from': from_lang,
+            'to': to_lang,
+            'salt': salt,
+            'sign': sign
         }
 
-        # 请求参数
-        params = {
-            "api-version": "3.0",
-            "to": target_language
-        }
-
-        # 请求体
-        body = [{"text": input_text}]
-
-        # 发送 POST 请求
-        response = requests.post(endpoint, headers=headers, params=params, json=body)
-        response.raise_for_status()
-
-        # 返回翻译结果
-        return response.json()[0]["translations"][0]["text"]
-
+        # 发送请求并解析结果
+        r = requests.post(url, params=payload, headers=headers)
+        result = r.json()
+        translated_text = result['trans_result'][0]['dst']
+        return translated_text
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

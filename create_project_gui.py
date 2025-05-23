@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from project import Project
+from detect_project_type import *;
+from translate_ui import *;
 
 class Createproject(QDialog):
     def __init__(self):
@@ -223,10 +225,20 @@ class Createproject(QDialog):
             use_termbase=use_termbase,
             termbase_path=termbase_path
         )
-
+        project_dir="projects"
+        parser = Fileparser(file_path,project_dir)
         # 创建项目文件
         if project.create():
-            print("项目创建成功")
+            try:
+                # 调用解析方法
+                parser.parse_source_file()
+                print("解析成功！结果保存在:", f"{project_dir}/parsed_content.json")
+                # 在解析成功后打开翻译面板
+                self.translate_window = TranslateWindow()  # 传递项目路径
+                self.translate_window.show()  # 显示翻译窗口
+
+            except Exception as e:
+                print("解析失败:", str(e))
             self.accept()
         else:
             print("项目创建失败")

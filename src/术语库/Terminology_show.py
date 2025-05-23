@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5 import QtCore, QtWidgets, uic
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QMessageBox
 from src.dao import Terminology_dao
@@ -81,7 +82,14 @@ class TerminologyItemsShow(QtWidgets.QDialog):
 
     def __init__(self, name="术语库详情"):
         super().__init__()
-        uic.loadUi("Terminology_items_show.ui", self)
+        # 获取当前文件所在目录
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(current_dir, "Terminology_items_show.ui")
+        print("UI 文件路径:", ui_path)
+        print("UI 文件存在吗？", os.path.exists(ui_path))
+        print("__file__ 的值:", __file__)
+        print([attr for attr in dir(self) if not attr.startswith('_')])
+        uic.loadUi(ui_path, self)
         self.setWindowTitle(name)
         self.resize(700, 500)
 

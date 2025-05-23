@@ -94,7 +94,17 @@ class TM_items_show(QtWidgets.QDialog):
     col_target_lang = 4
     def __init__(self, name = "记忆库详情"):
         super().__init__()
-        uic.loadUi("TM_items_show.ui", self)
+        """
+        """
+        # 获取当前文件所在目录
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(current_dir, "TM_items_show.ui")
+        print("UI 文件路径:", ui_path)
+        print("UI 文件存在吗？", os.path.exists(ui_path))
+        print("__file__ 的值:", __file__)
+        print([attr for attr in dir(self) if not attr.startswith('_')])
+
+        uic.loadUi(ui_path, self)
         self.name = name
         self.setWindowTitle(self.name)
         self.resize(600, 500)

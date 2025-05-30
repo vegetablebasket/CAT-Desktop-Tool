@@ -11,7 +11,18 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "../data/database.db")
 # 建立连接，若文件不存在会自动创建
 conn = sqlite3.connect(DB_PATH)
 cur = conn.cursor()
-
+#创建 table_description 表，用于记录对表的总的描述信息
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS table_description(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,  -- 自增ID
+        tm_name VARCHAR(255)  UNIQUE,       -- 表名
+        item_number VARCHAR(255),           --相应的表中的条目数量
+        description TEXT,                   --描述文本
+        owner INTEGER,                      --创建者
+        create_time DATETIME  ,              --创建时间
+        table_type VARCHAR(50)             -- 表类型，例如“术语库表”、“翻译记忆库表”
+        )
+''')
 # 创建 translation_memory 表
 cur.execute('''
     CREATE TABLE IF NOT EXISTS translation_memory (
@@ -24,7 +35,7 @@ cur.execute('''
     created_at DATETIME DEFAULT (datetime('now', 'localtime')),  -- 创建时间，默认当前时间
     FOREIGN KEY (created_by) REFERENCES users(user_id)            -- 外键关联用户表（假设表名为 users，主键为 user_id）
     )
-    ''')
+''')
 
 # 创建 terminology 表
 cur.execute('''
@@ -51,6 +62,7 @@ cur.execute('''
     FOREIGN KEY (user_id) REFERENCES users(user_id)
    )
    ''')
+
 conn.commit()
 conn.close()
 

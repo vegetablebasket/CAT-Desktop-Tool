@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5 import QtCore, QtWidgets, uic
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QMessageBox
-from src.dao import Terminology_dao
+from src.dao import Terminology_dao,table_description_dao
 
 
 class EditableTextEdit(QtWidgets.QTextEdit):
@@ -93,6 +93,10 @@ class TerminologyItemsShow(QtWidgets.QDialog):
         self.setWindowTitle(name)
         self.resize(700, 500)
 
+        self.name = name
+        self.table_name = Terminology_dao.sanitize_table_name(self.name)
+        self.table_type = 'terminology'
+
         # 表格设置：6列，列宽自动拉伸，单行选择
         self.tableWidget_item.setColumnCount(6)
         self.tableWidget_item.setHorizontalHeaderLabels(
@@ -117,12 +121,22 @@ class TerminologyItemsShow(QtWidgets.QDialog):
         # 加载数据
         self.load_terminology_data()
 
+    def closeEvent(self, event):
+        """关闭事件，更新描述信息"""
+        try:
+            count = table_description_dao.get_record_count(self.table_name)
+            table_description_dao.update_table_description(self.table_name, count , None, None,self.table_type)
+            print("更新成功")
+        except Exception as e:
+            print(f"关闭时更新描述失败: {e}")
+        super().closeEvent(event)
+
     def load_terminology_data(self):
         """从数据库加载术语数据并显示"""
         self.tableWidget_item.clearContents()
         self.tableWidget_item.setRowCount(0)
 
-        terminology_list = Terminology_dao.list_terminologies()
+        terminology_list = Terminology_dao.list_terminologies(self.table_name)
 
         for row_idx, item in enumerate(terminology_list):
             self.tableWidget_item.insertRow(row_idx)
@@ -163,7 +177,7 @@ class TerminologyItemsShow(QtWidgets.QDialog):
                 QMessageBox.warning(self, "提示", "术语原文和对应译文不能为空！")
                 return
             term_id = Terminology_dao.add_terminology(
-                data["term"], data["translation"], data["definition"], data["domain"], data["project_id"]
+                data["term"], data["translation"],self.table_name, data["definition"], data["domain"], data["project_id"]
             )
             if term_id:
                 QMessageBox.information(self, "成功", f"新增术语条目成功，ID={term_id}")
@@ -210,7 +224,7 @@ class TerminologyItemsShow(QtWidgets.QDialog):
                 QMessageBox.warning(self, "提示", "术语原文和对应译文不能为空！")
                 return
 
-            success = Terminology_dao.update_terminology(term_id, term, translation, definition, domain, project_id)
+            success = Terminology_dao.update_terminology(term_id,self.table_name, term, translation, definition, domain, project_id)
             if success:
                 QMessageBox.information(self, "成功", "术语条目保存成功！")
                 # 取消编辑状态，设置单元格只读
@@ -235,7 +249,7 @@ class TerminologyItemsShow(QtWidgets.QDialog):
         term_id = self.tableWidget_item.item(row, self.col_term_id).text()
         ret = QMessageBox.question(self, "确认删除", f"确定删除ID={term_id}的术语条目吗？", QMessageBox.Yes | QMessageBox.No)
         if ret == QMessageBox.Yes:
-            success = Terminology_dao.delete_terminology(int(term_id))
+            success = Terminology_dao.delete_terminology(int(term_id),self.table_name)
             if success:
                 QMessageBox.information(self, "成功", "术语条目删除成功！")
                 self.load_terminology_data()
@@ -251,7 +265,7 @@ class TerminologyItemsShow(QtWidgets.QDialog):
                                                    options=options)
         if file_path:
             try:
-                Terminology_dao.export_terminology(file_path)
+                Terminology_dao.export_terminology(file_path ,self.table_name)
                 QMessageBox.information(self, "导出成功", f"术语库已成功导出到:\n{file_path}")
             except Exception as e:
                 QMessageBox.warning(self, "导出失败", f"导出时发生错误:\n{e}")
@@ -265,7 +279,7 @@ class TerminologyItemsShow(QtWidgets.QDialog):
                                                    options=options)
         if file_path:
             try:
-                Terminology_dao.import_terminology(file_path)
+                Terminology_dao.import_terminology(file_path ,self.table_name)
                 QMessageBox.information(self, "导入成功", f"术语库已成功从文件导入:\n{file_path}")
                 self.load_terminology_data()  # 重新加载数据
             except Exception as e:

@@ -1,0 +1,1 @@
+from . import Terminology_manage

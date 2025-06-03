@@ -3,3 +3,12 @@
 
 # 忽略PyCharm编辑器相关
 .idea/
+
+# 忽略缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 忽略数据库
+*.db
+*.sqlite

@@ -204,3 +204,4 @@ class TranslationPage(QWidget):
         这里先占位，弹窗提示
         """
         QMessageBox.information(self, "提示", "查词/术语辅助功能后续开发")
+

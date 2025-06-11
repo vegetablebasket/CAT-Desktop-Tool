@@ -99,6 +99,8 @@ def query_tm_entries(table_name, keyword=None):
     查询指定表中的翻译记忆条目，支持关键字模糊搜索
     返回列表，格式为 [(tm_id, source_text, target_text, source_lang, target_lang, created_by, created_at), ...]
     """
+    table_name = sanitize_identifier(table_name)
+
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
         if keyword:

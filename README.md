@@ -149,7 +149,6 @@ src/ :主程序代码主目录
     |——Terminology_show.py : 实现术语库中数据的管理  
 ——main_window.py :
     
-data/ :项目运行所需的初始数据或演示项目  
-tests/ :用于跑自动化测试  
+data/:项目运行所需的初始数据或演示项目
 README.md :项目入口说明，展示功能  
 requirements.txt :安装依赖

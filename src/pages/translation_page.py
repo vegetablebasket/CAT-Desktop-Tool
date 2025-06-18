@@ -9,6 +9,11 @@ from PyQt5.QtWidgets import QComboBox
 
 import sys
 import os
+
+import api_ui
+from Translation.ui_select_tmAndterminology import  test_demo_show_fuzzy_match
+from api_ui import api_ui_
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from dao import translation_fragment_dao
@@ -29,26 +34,32 @@ class TranslationPage(QWidget):
             self.load_fragments(document_id)
 
     def init_ui(self):
-        # 主垂直布局
-        self.layout = QVBoxLayout()
+        # 创建主水平布局，左右分栏
+        main_layout = QHBoxLayout()
+        self.setLayout(main_layout)
+
+        # 左边：翻译编辑区，放到一个单独的 QWidget 里
+        self.left_widget = QWidget()
+        left_layout = QVBoxLayout()
+        self.left_widget.setLayout(left_layout)
 
         # 段落进度标签
         self.progress_label = QLabel("段落进度：0/0")
-        self.layout.addWidget(self.progress_label)
+        left_layout.addWidget(self.progress_label)
 
         # 原文显示标签
         self.source_label = QLabel("原文内容：")
         self.source_label.setWordWrap(True)
-        self.layout.addWidget(self.source_label)
+        left_layout.addWidget(self.source_label)
 
         # 译文输入区
-        self.layout.addWidget(QLabel("请输入译文："))
+        left_layout.addWidget(QLabel("请输入译文："))
         self.text_edit = QTextEdit()
-        self.layout.addWidget(self.text_edit)
+        left_layout.addWidget(self.text_edit)
 
         # 状态显示标签
         self.status_label = QLabel("当前状态：")
-        self.layout.addWidget(self.status_label)
+        left_layout.addWidget(self.status_label)
 
         # 翻译进度条
         self.progress_bar = QProgressBar()
@@ -56,13 +67,13 @@ class TranslationPage(QWidget):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
         self.progress_bar.setFormat("翻译进度：%p%")
-        self.layout.addWidget(self.progress_bar)
+        left_layout.addWidget(self.progress_bar)
 
         # 状态过滤下拉框
         self.filter_box = QComboBox()
         self.filter_box.addItems(["全部", "未翻译", "已翻译", "需审校"])
         self.filter_box.currentIndexChanged.connect(self.on_filter_changed)
-        self.layout.addWidget(self.filter_box)
+        left_layout.addWidget(self.filter_box)
 
         # 按钮区
         btn_layout = QHBoxLayout()
@@ -75,15 +86,21 @@ class TranslationPage(QWidget):
         self.btn_next = QPushButton("下一段")
         self.btn_next.clicked.connect(self.next_fragment)
         btn_layout.addWidget(self.btn_next)
-        self.layout.addLayout(btn_layout)
         self.btn_copy_source = QPushButton("复制原文")
         self.btn_copy_source.clicked.connect(self.copy_source_text)
         btn_layout.addWidget(self.btn_copy_source)
-        self.btn_lookup = QPushButton("查词")
+        self.btn_lookup = QPushButton("机器翻译")
         self.btn_lookup.clicked.connect(self.lookup_word)
         btn_layout.addWidget(self.btn_lookup)
 
-        self.setLayout(self.layout)
+        left_layout.addLayout(btn_layout)
+
+        # 把左边控件添加到主布局
+        main_layout.addWidget(self.left_widget, stretch=3)  # stretch参数控制宽度比例
+
+        # 右边：模糊匹配显示区
+        self.fuzzy_match_widget = test_demo_show_fuzzy_match()
+        main_layout.addWidget(self.fuzzy_match_widget, stretch=2)
 
     def on_filter_changed(self):
         """
@@ -200,8 +217,11 @@ class TranslationPage(QWidget):
 
     def lookup_word(self):
         """
-        查词按钮，后续可联动术语库/记忆库
-        这里先占位，弹窗提示
+        机器翻译按钮，点击后跳转到机器翻译界面
         """
-        QMessageBox.information(self, "提示", "查词/术语辅助功能后续开发")
+        try:
+            self.translation_app = api_ui.api_ui_. TranslatorApp()
+            self.translation_app.show()
+        except Exception as e:
+            print(e)
 

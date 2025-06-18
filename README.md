@@ -106,18 +106,49 @@ import_export_stub.py
 ## 项目结构说明
 docs/ :项目所有设计类文档，包括需求分析、用例图、ER图、调研报告  
 src/ :主程序代码主目录  
+——api_ui/ :调用机器翻译
+    |——__init__.py :空，仅作为识别软件包的标识 
+    |——api_ui_.py :
 ——dao/ :数据库操作相关文件  
-————__init__.py :空，仅作为识别软件包的标识  
-————document_dao.py :文档管理相关数据库操作  
-————project_dao.py :翻译项目管理模块  
+    |——__init__.py :空，仅作为识别软件包的标识  
+    |——document_dao.py :文档管理相关数据库操作  
+    |——project_dao.py :翻译项目管理模块  
+    |——table_description_dao.py :元表的数据库操作，元表用于记录不同翻译记忆库与术语库的描述信息
+    |——Terminology_dao.py :翻译术语库的数据库操作
+    |——TM_dao.py :翻译记忆库的数据库操作
+    |——translation_fragment_dao.py :
 ——data/ :数据库  
+    |——cat.db :
+    |——database.db :数据库的数据存储位置
 ——pages/ :各种页面  
-————__init__.py :同上  
-————document_page.py :翻译文档管理页面  
-————project_page.py :翻译项目管理页面  
-————term_page.py :术语库管理页面  
-————tm_page.py :翻译记忆库管理页面  
-————translation_page.py :翻译编辑页面  
+    |——__init__.py :同上  
+    |——document_page.py :翻译文档管理页面  
+    |——project_page.py :翻译项目管理页面  
+    |——term_page.py :术语库管理页面  
+    |——tm_page.py :翻译记忆库管理页面  
+    |——translation_page.py :翻译编辑页面  
+——temp_tm_manage翻译记忆库/ :
+    |——__init__.py :空，仅作为识别软件包的标识
+    |——clear_test_data.py : 用于测试时清楚翻译记忆库中的数据
+    |——Create_TM_show.ui : 询问用户穿建的翻译记忆库的描述信息的ui
+    |——temp_TM_item_show.py : 展示翻译记忆库中的数据
+    |——TM_items_show.ui : 用于展示翻译记忆库中的数据的ui
+    |——TM_manage.py :翻译记忆库的初步管理
+    |——TM_manage_show.ui : 翻译记忆库的初步管理ui
+    |——Tool.py :存放自动识别输入语种的相关功能
+——Translation/ :
+    |——__init__.py :空，仅作为识别软件包的标识 
+    |——Fuzzy_match.py :存放模糊匹配功能
+    |——ui_select_tmAndterminology.py :实现模糊匹配与精确匹配的功能
+——术语库/ :
+    |——__init__.py :空，仅作为识别软件包的标识 
+    |——Create_Terminology.ui :询问术语库描述信息的界面ui
+    |——Terminology_items_show.ui :展示术语库中数据的界面ui
+    |——Terminology_manage.py : 实现术语库的管理
+    |——Terminology_manage_show.ui : 术语库管理界面ui
+    |——Terminology_show.py : 实现术语库中数据的管理
+——main_window.py :
+    
 data/ :项目运行所需的初始数据或演示项目  
 tests/ :用于跑自动化测试  
 README.md :项目入口说明，展示功能  
